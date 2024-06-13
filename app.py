@@ -9,6 +9,7 @@ from langchain_community.vectorstores import FAISS
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
+
 # Khởi tạo Flask app
 app = Flask(__name__)
 
@@ -22,9 +23,8 @@ llm = OpenAI(api_key=openai.api_key)
 
 # Prompt template cho việc truy vấn
 prompt_template = """
-Based on the given context, provide detailed information about the properties including ID, location, address, bedrooms, and price. The response should include:
-- Property ID
-- Location
+Based on the given context, provide detailed information about the properties including Title, address, bedrooms, and price. The response should include:
+- Title
 - Address
 - Bedrooms
 - Price
@@ -83,7 +83,7 @@ Possible intents:
 4. Book an appointment
 Respond with the intent clearly.
 """
-    response = openai.Completion.create(
+    response = openai.completions.create(
         model="gpt-3.5-turbo-instruct",
         prompt=prompt,
         temperature=0
