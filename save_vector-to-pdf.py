@@ -3,6 +3,7 @@ from langchain.vectorstores import FAISS
 from langchain.embeddings import OpenAIEmbeddings
 import openai
 
+
 # Đặt API key cho OpenAI
 
 # Hàm để trích xuất văn bản từ tệp PDF

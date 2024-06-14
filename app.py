@@ -19,7 +19,7 @@ embeddings = OpenAIEmbeddings(openai_api_key=openai.api_key, model="text-embeddi
 vector_store = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
 
 # Khởi tạo mô hình OpenAI LLM
-llm = OpenAI(api_key=openai.api_key)
+llm = OpenAI(api_key=openai.api_key,temperature=0.1)
 
 # Prompt template cho việc truy vấn
 prompt_template = """
@@ -46,27 +46,29 @@ rag_chain = RetrievalQA.from_chain_type(
 # Hàm để truy vấn RAG chain
 def query_rag(query_text):
     # Thực hiện truy vấn sử dụng RAG
-    response = rag_chain({"query" : query_text})
+    response = rag_chain.invoke({"query" : query_text})
     return response
 
 
-# Hàm xử lý hành động dựa trên ý định của người dùng
-def handle_intent(intent, query):
-    if "Greet the user" in intent:
-        return "Hello! How can I assist you today?"
-    elif "Find property details" in intent:
-        print(intent)
-        msg = query_rag(query)
-        return msg
-    elif "Get list of properties" in intent:
-        msg = query_rag(query)
-        return msg
-    elif "Book an appointment" in intent:
-        # Logic đặt lịch hẹn cho bất động sản
-        return "Please provide the property ID and preferred time for booking an appointment."
-    else:
-        response = query_rag(query)
-        return response['result']
+
+
+# # Hàm xử lý hành động dựa trên ý định của người dùng
+# def handle_intent(intent, query):
+#     if "Greet the user" in intent:
+#         return "Hello! How can I assist you today?"
+#     elif "Find property details" in intent:
+#         print(intent)
+#         msg = query_rag(query)
+#         return msg
+#     elif "Get list of properties" in intent:
+#         msg = query_rag(query)
+#         return msg
+#     elif "Book an appointment" in intent:
+#         # Logic đặt lịch hẹn cho bất động sản
+#         return "Please provide the property ID and preferred time for booking an appointment."
+#     else:
+#         response = query_rag(query)
+#         return response['result']
 
 
 def identify_intent(query):
@@ -96,13 +98,14 @@ def api_query():
     data = request.json
     message = data.get('message', '')
     # Xác định ý định của người dùng
-    intent = identify_intent(message)
+    # intent = identify_intent(mesxsage)
 
+    print(message)
        # Xử lý hành động dựa trên ý định của người dùng
-    response_message = handle_intent(intent, message)
+    response_message = query_rag(message)['result']
+    print(response_message)
 
     return jsonify({
-        "intent": intent,
         'response_message' : response_message
     })
 

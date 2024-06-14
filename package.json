@@ -1,0 +1,12 @@
+{
+  "name": "langchain-chatbot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://chuhuumanh@github.com/chuhuumanh/chatbot-system.git",
+  "author": "manh chu the <manhchu@fetch.tech>",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "pdfkit": "^0.15.0"
+  }
+}
