@@ -8,11 +8,12 @@ from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
+import re
+
 
 
 # Khởi tạo Flask app
 app = Flask(__name__)
-
 embeddings = OpenAIEmbeddings(openai_api_key=openai.api_key, model="text-embedding-ada-002")
 
 # Tải FAISS index từ tệp
@@ -50,25 +51,35 @@ def query_rag(query_text):
     return response
 
 
+def extract_property_id(query):
+    match = re.search(r'property id (\d+)', query, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    return None
 
-
-# # Hàm xử lý hành động dựa trên ý định của người dùng
-# def handle_intent(intent, query):
-#     if "Greet the user" in intent:
-#         return "Hello! How can I assist you today?"
-#     elif "Find property details" in intent:
-#         print(intent)
-#         msg = query_rag(query)
-#         return msg
-#     elif "Get list of properties" in intent:
-#         msg = query_rag(query)
-#         return msg
-#     elif "Book an appointment" in intent:
-#         # Logic đặt lịch hẹn cho bất động sản
-#         return "Please provide the property ID and preferred time for booking an appointment."
-#     else:
-#         response = query_rag(query)
-#         return response['result']
+# Hàm xử lý hành động dựa trên ý định của người dùng
+def handle_intent(intent, query):
+    if "Greet the user" in intent:
+        return "Hello! How can I assist you today?"
+    elif "Find property detail" in intent:
+        property_id = extract_property_id(query)
+        if property_id:
+            detailed_query = f"Give me the details for property id {property_id} only."
+            msg = query_rag(detailed_query)
+            response = msg.get('result', 'No details found for the specified property id.')
+        else:
+            msg = query_rag(query)
+            response = msg.get('result', 'No details found.')
+        return response
+    elif "Get list of properties" in intent:
+        msg = query_rag(query)
+        response = msg.get('result', 'Can you describe more specifically the property you are looking for?')
+        return response
+    elif "Book an appointment" in intent:
+        # Logic đặt lịch hẹn cho bất động sản
+        return "Please provide the property ID and preferred time for booking an appointment."
+    else:
+        return "Can you give more details?"
 
 
 def identify_intent(query):
@@ -83,29 +94,48 @@ Possible intents:
 2. Find property detail
 3. Get list of properties
 4. Book an appointment
-Respond with the intent clearly.
+
+Respond with one of the possible intents clearly.
 """
     response = openai.completions.create(
         model="gpt-3.5-turbo-instruct",
         prompt=prompt,
         temperature=0
     )
-    intent = response.choices[0].text.strip()
-    return intent
+    
+    # Lấy text response từ GPT-3.5
+    response_text = response.choices[0].text.strip()
+
+    # Các ý định hợp lệ
+    valid_intents = {
+        "Greet the user": "Greet the user",
+        "Find property detail": "Find property detail",
+        "Get list of properties": "Get list of properties",
+        "Book an appointment": "Book an appointment"
+    }
+    
+    # Kiểm tra và lấy intent từ response
+    for intent in valid_intents:
+        if intent.lower() in response_text.lower():
+            return valid_intents[intent]
+
+    return "Unknown intent"
 
 @app.route('/api/query', methods=['POST'])
 def api_query():
     data = request.json
     message = data.get('message', '')
     # Xác định ý định của người dùng
-    # intent = identify_intent(mesxsage)
+    intent = identify_intent(message)
+    print(intent)
 
-    print(message)
+    response_message= handle_intent(intent,message)
        # Xử lý hành động dựa trên ý định của người dùng
-    response_message = query_rag(message)['result']
-    print(response_message)
+    # response_message = query_rag(message)['result']
+    # print(response_message)
 
     return jsonify({
+        'intent' : intent,
         'response_message' : response_message
     })
 

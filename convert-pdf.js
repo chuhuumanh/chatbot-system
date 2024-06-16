@@ -198,19 +198,14 @@ function createPDF(data, filename) {
   const stream = fs.createWriteStream(filename);
   doc.pipe(stream);
 
-  data.forEach((property) => {
+  data.forEach((property, index) => {
+    doc.text(`Property ID: ${index + 1}`);
     doc.text(`Title: ${property.title}`);
-    doc.moveDown();
     doc.text(`Address: ${property.fullAddressText}`);
-    doc.moveDown();
     doc.text(`Bedrooms: ${property.bed}`);
-    doc.moveDown();
     doc.text(`Bathrooms: ${property.bath}`);
-    doc.moveDown();
     doc.text(`Price: ${property.amount}`);
-    doc.moveDown();
     doc.text(`Property Details: ${property.about}`);
-    doc.moveDown();
     doc.moveDown(); // Add extra space between properties
   });
 

@@ -19,10 +19,10 @@ def extract_text_from_pdf(pdf_file_path):
 
 # Hàm để chia văn bản thành các đoạn dựa trên "Property Id"
 def split_text_by_property_id(text):
-    properties = text.split("Title:")
+    properties = text.split("Property ID:")
     if properties[0].strip() == "":
         properties = properties[1:]
-    properties = ["Title:" + prop.strip() for prop in properties]
+    properties = ["Property ID:" + prop.strip() for prop in properties]
     return properties
 
 # Đường dẫn tới tệp PDF chứa thông tin về bất động sản
