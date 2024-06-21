@@ -11,7 +11,6 @@ from langchain.chains import LLMChain
 import re
 
 
-
 # Khởi tạo Flask app
 app = Flask(__name__)
 embeddings = OpenAIEmbeddings(openai_api_key=openai.api_key, model="text-embedding-ada-002")
@@ -52,9 +51,9 @@ def query_rag(query_text):
 
 
 def extract_property_id(query):
-    match = re.search(r'property id (\d+)', query, re.IGNORECASE)
+    match = re.search(r'DEPARTMENT-(\d+)', query, re.IGNORECASE)
     if match:
-        return match.group(1)
+        return match.group(0)
     return None
 
 # Hàm xử lý hành động dựa trên ý định của người dùng
@@ -70,14 +69,24 @@ def handle_intent(intent, query):
         else:
             msg = query_rag(query)
             response = msg.get('result', 'No details found.')
+
+            if not response or response.strip() == "":
+             response = "Please provide more detailed information."
         return response
     elif "Get list of properties" in intent:
         msg = query_rag(query)
         response = msg.get('result', 'Can you describe more specifically the property you are looking for?')
         return response
     elif "Book an appointment" in intent:
-        # Logic đặt lịch hẹn cho bất động sản
-        return "Please provide the property ID and preferred time for booking an appointment."
+        print(query)
+        property_id = extract_property_id(query)
+        print(property_id)
+        if property_id:
+            return f"propertyId:{property_id}"
+        else:
+            return "Please provide the code of the property you need to create a booking appointment"
+    elif "Enter email" in intent:
+        return query
     else:
         return "Can you give more details?"
 
@@ -94,6 +103,8 @@ Possible intents:
 2. Find property detail
 3. Get list of properties
 4. Book an appointment
+5. Enter email
+
 
 Respond with one of the possible intents clearly.
 """
@@ -111,7 +122,8 @@ Respond with one of the possible intents clearly.
         "Greet the user": "Greet the user",
         "Find property detail": "Find property detail",
         "Get list of properties": "Get list of properties",
-        "Book an appointment": "Book an appointment"
+        "Book an appointment": "Book an appointment",
+        "Enter email": "Enter email"
     }
     
     # Kiểm tra và lấy intent từ response

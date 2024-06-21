@@ -6,6 +6,7 @@ import openai
 
 # Đặt API key cho OpenAI
 
+
 # Hàm để trích xuất văn bản từ tệp PDF
 def extract_text_from_pdf(pdf_file_path):
     text = ""
@@ -19,10 +20,10 @@ def extract_text_from_pdf(pdf_file_path):
 
 # Hàm để chia văn bản thành các đoạn dựa trên "Property Id"
 def split_text_by_property_id(text):
-    properties = text.split("Property ID:")
+    properties = text.split("Code:")
     if properties[0].strip() == "":
         properties = properties[1:]
-    properties = ["Property ID:" + prop.strip() for prop in properties]
+    properties = ["Code:" + prop.strip() for prop in properties]
     return properties
 
 # Đường dẫn tới tệp PDF chứa thông tin về bất động sản
