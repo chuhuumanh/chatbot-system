@@ -791,13 +791,11 @@ function createPDF(data, filename) {
   doc.pipe(stream);
 
   data.forEach((property) => {
-    doc.text(`Code: ${property.code}`);
     doc.text(`Title: ${property.title}`);
     doc.text(`Address: ${property.address}`);
     doc.text(`Bedrooms: ${property.bed}`);
     doc.text(`Bathrooms: ${property.bath}`);
     doc.text(`Price: ${property.amount}`);
-    doc.text(`${JSON.parse(property.about)}`);
     doc.moveDown(); // Add extra space between properties
   });
 
